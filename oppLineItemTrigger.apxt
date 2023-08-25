@@ -1,0 +1,5 @@
+trigger oppLineItemTrigger on opportunityLineItem(After Insert,After update,After delete){
+    OppLineItemTriggerHandler objOppLineItemTriggerHandler=new OppLineItemTriggerHandler();
+    objOppLineItemTriggerHandler.doAction();
+    
+}
