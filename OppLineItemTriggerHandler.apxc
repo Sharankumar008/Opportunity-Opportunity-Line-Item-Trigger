@@ -1,0 +1,83 @@
+public class OppLineItemTriggerHandler{
+    List<opportunityLineItem> triggerNew;
+    List<opportunityLineItem> triggerOld;
+    Map<Id,opportunityLineItem> triggerNewMap;
+    Map<Id,opportunityLineItem> triggerOldMap;
+    
+    public OppLineItemTriggerHandler(){
+        triggerNew=(List<opportunityLineItem>)Trigger.new;
+        triggerOld=(List<opportunityLineItem>)Trigger.old;
+        triggerNewMap=(Map<Id,opportunityLineItem>)Trigger.newMap;
+        triggerOldMap=(Map<Id,opportunityLineItem>)Trigger.oldMap;
+    }
+    public void doAction(){
+        Switch on Trigger.operationType{
+            when BEFORE_INSERT{
+                
+            }
+            when AFTER_INSERT{
+                onAfterInsert(triggerNew);
+            }
+            when BEFORE_UPDATE{
+                
+            }
+            when AFTER_UPDATE{
+                onAfterInsert(triggerNew);
+            }
+            when BEFORE_DELETE{
+                
+            }
+            when AFTER_DELETE{
+                onAfterInsert(triggerOld);
+            }
+            when AFTER_UNDELETE{
+                
+            }
+        }
+    }
+    public void onBeforeInsert(){
+        
+    }
+    public void onAfterInsert(List<opportunityLineItem> opportunityLineItemList){
+       Set<Id> oppId=new Set<Id>();
+	   for(opportunityLineItem oppLineRecord:opportunityLineItemList){
+			oppId.add(oppLineRecord.OpportunityId);
+	
+	   }
+	   
+	   List<opportunityLineItem> oppLineList=[Select ProductCode,OpportunityId from opportunityLineItem where OpportunityId in : oppId];
+	   Map<Id,List<String>> productCodeMap=new Map<Id,List<String>>();
+	   
+	   for(opportunityLineItem record:oppLineList){
+			if(!productCodeMap.containsKey(record.OpportunityId)){
+				productCodeMap.put(record.OpportunityId,new List<String>());
+			}
+			productCodeMap.get(record.OpportunityId).add(record.ProductCode);
+	   }
+	   List<Opportunity> oppLineItemList=[Select Id,OppLineItem_Product_Code__c from Opportunity where id in :oppId ];
+	   List<Opportunity> oppList = new List<Opportunity>();
+	   
+	   for(Opportunity oppRecord:oppLineItemList){
+			List<String> proCode=productCodeMap.get(oppRecord.Id);
+			oppRecord.OppLineItem_Product_Code__c=String.join(proCode,', ');
+			oppList.add(oppRecord);
+	   }
+	   if(!oppList.isEmpty()){
+			update oppList;
+	   }
+    }
+    public void onBeforeUpdate(){
+       
+  
+    }
+    public void onAfterUpdate(){
+        
+    }
+    
+    public void onBeforeDelete(){
+        
+    }
+    public void onAfterUnDelete(){
+    
+	}
+}
